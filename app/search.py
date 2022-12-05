@@ -4,7 +4,9 @@ from app.data import DataApi
 from settings import ANSWERS
 
 
+
 class Search:
+
     def __init__(self, user_token, user_id, service_api, client_info, api_version='5.131'):
         self.user_token = user_token
         self.user_id = user_id
@@ -13,6 +15,7 @@ class Search:
         self.serv = service_api
         self.client_info = client_info
         self.answers = ANSWERS
+        self.base = None
 
     def check_bdate(self):
         while True:
@@ -117,27 +120,29 @@ class Search:
         return params
 
     def search_users(self):
-        method = 'users.search'
+        try:
+            method = 'users.search'
 
-        resp_url = f'https://api.vk.com/method/{method}'
-        resp = requests.get(resp_url, self.search_params()).json()
+            resp_url = f'https://api.vk.com/method/{method}'
+            resp = requests.get(resp_url, self.search_params()).json()
 
-        users_pack = {}
-        for user in resp['response'].get('items'):
+            users_pack = {}
 
-            profile_pics = self.data.get_profile_pics(user['id'])
-            if profile_pics:
+            for user in resp['response'].get('items'):
+                profile_pics = self.data.get_profile_pics(user['id'])
+                if profile_pics:
 
-                attach = ''
-                for pic in profile_pics['pics_ids']:
-                    attach += f'photo{profile_pics["owner_id"]}_{pic},'
+                    attach = ''
+                    for pic in profile_pics['pics_ids']:
+                        attach += f'photo{profile_pics["owner_id"]}_{pic},'
 
-                user_url = f'https://vk.com/id{user["id"]}'
-                msg = f'{user["first_name"]} {user["last_name"]} {user_url}'
+                    user_url = f'https://vk.com/id{user["id"]}'
+                    msg = f'{user["first_name"]} {user["last_name"]} {user_url}'
 
-                users_pack[user['id']] = {
-                    'msg': msg,
-                    'attach': attach
-                }
-
-        return users_pack
+                    users_pack[user['id']] = {
+                        'msg': msg,
+                        'attach': attach
+                    }
+            return users_pack
+        except:
+            print("Что-то пошло не так...")

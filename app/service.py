@@ -10,27 +10,33 @@ class ServiceApi:
         self.api = api_version
 
     def get_group_id(self):
-        method = 'groups.getById'
+        try:
+            method = 'groups.getById'
 
-        params = {
-            'access_token': self.comm_token,
-            'v': self.api
-        }
-        resp_url = f'https://api.vk.com/method/{method}'
+            params = {
+                'access_token': self.comm_token,
+                'v': self.api
+            }
+            resp_url = f'https://api.vk.com/method/{method}'
 
-        return requests.get(resp_url, params).json()['response'][0]['id']
+            return requests.get(resp_url, params).json()['response'][0]['id']
+        except:
+            print("Что-то пошло не так...")
 
     def get_longpoll_server(self):
-        method = 'groups.getLongPollServer'
+        try:
+            method = 'groups.getLongPollServer'
 
-        params = {
-            'group_id': self.get_group_id(),
-            'access_token': self.comm_token,
-            'v': self.api
-        }
-        resp_url = f'https://api.vk.com/method/{method}'
+            params = {
+                'group_id': self.get_group_id(),
+                'access_token': self.comm_token,
+                'v': self.api
+            }
+            resp_url = f'https://api.vk.com/method/{method}'
 
-        return requests.get(resp_url, params).json()['response']
+            return requests.get(resp_url, params).json()['response']
+        except:
+            print("Что-то пошло не так...")
 
     def receive_m(self):
         longpoll = self.get_longpoll_server()
@@ -52,16 +58,19 @@ class ServiceApi:
             longpoll['ts'] = resp['ts']
 
     def send_m(self, msg=None, attach=None):
-        method = 'messages.send'
+        try:
+            method = 'messages.send'
 
-        params = {
-            'user_id': self.bot_user,
-            'access_token': self.comm_token,
-            'message': msg,
-            'attachment': attach,
-            'random_id': random.randint(0, 10000),
-            'v': self.api
-        }
-        resp_url = f'https://api.vk.com/method/{method}'
+            params = {
+                'user_id': self.bot_user,
+                'access_token': self.comm_token,
+                'message': msg,
+                'attachment': attach,
+                'random_id': random.randint(0, 10000),
+                'v': self.api
+            }
+            resp_url = f'https://api.vk.com/method/{method}'
 
-        return requests.get(resp_url, params).json()
+            return requests.get(resp_url, params).json()
+        except:
+            print("Что-то пошло не так...")

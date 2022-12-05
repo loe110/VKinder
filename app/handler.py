@@ -1,8 +1,8 @@
 from app.service import ServiceApi
 from app.data import DataApi
 from app.search import Search
-from app.base import ResultsBase
-
+from my_database import Session, Views
+db_session = Session()
 
 class Handler:
     def __init__(self, community_token, user_token, answers, user_id='', client_id='', api_version='5.131'):
@@ -35,11 +35,8 @@ class Handler:
                     if client_info:
                         self.client_id = client_info.get('id')
                         self.search = Search(self.user_token, self.user_id, self.serv, client_info)
-                        self.base = ResultsBase(self.client_id)
+                        self.base = Views(self.client_id, self.user_id)
                         self.serv.send_m(self.answers['client_found'])
-
-                        if self.base.is_saved():
-                            self.serv.send_m(self.answers['saved'])
                         self.search_menu()
 
                     else:
@@ -50,12 +47,15 @@ class Handler:
 
     def search_menu(self):
         for vk_user_id, result in self.search.search_users().items():
-            if not self.base.is_shown(vk_user_id):
+            viewed = db_session.query(Views.view_id).all()
+            viewed_ = [view[0] for view in viewed]
 
-                self.base.add_shown(vk_user_id)
+            if vk_user_id not in viewed_:
 
                 self.serv.send_m(result['msg'], result['attach'])
                 self.serv.send_m(self.answers['search_next'])
+                db_session.add(Views(self.client_id, vk_user_id))
+                db_session.commit()
 
                 while True:
                     command = self.serv.receive_m()['text']

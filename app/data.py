@@ -7,32 +7,38 @@ class DataApi:
         self.api = api_version
 
     def get_countries_list(self):
-        method = 'database.getCountries'
+        try:
+            method = 'database.getCountries'
 
-        params = {
-            'need_all': '1',
-            'count': '235',
-            'access_token': self.user_token,
-            'v': self.api
-        }
+            params = {
+                'need_all': '1',
+                'count': '235',
+                'access_token': self.user_token,
+                'v': self.api
+            }
 
-        resp_url = f'https://api.vk.com/method/{method}'
+            resp_url = f'https://api.vk.com/method/{method}'
 
-        return requests.get(resp_url, params).json()['response']['items']
+            return requests.get(resp_url, params).json()['response']['items']
+        except:
+            print("Что-то пошло не так...")
 
     def get_cities_list(self, country_id):
-        method = 'database.getCities'
+        try:
+            method = 'database.getCities'
 
-        params = {
-            'country_id': country_id,
-            'need_all': '0',
-            'count': '30',
-            'access_token': self.user_token,
-            'v': self.api
-        }
-        resp_url = f'https://api.vk.com/method/{method}'
+            params = {
+                'country_id': country_id,
+                'need_all': '0',
+                'count': '30',
+                'access_token': self.user_token,
+                'v': self.api
+            }
+            resp_url = f'https://api.vk.com/method/{method}'
 
-        return requests.get(resp_url, params).json()['response']['items']
+            return requests.get(resp_url, params).json()['response']['items']
+        except:
+            print("Что-то пошло не так...")
 
     def get_user_info(self, user_id):
         try:
@@ -62,34 +68,37 @@ class DataApi:
             return False
 
     def get_profile_pics(self, user_id):
-        method = 'photos.get'
-
-        params = {
-            'user_id': user_id,
-            'album_id': 'profile',
-            'extended': '1',
-            'access_token': self.user_token,
-            'v': self.api
-        }
-
-        resp_url = f'https://api.vk.com/method/{method}'
-        resp = requests.get(resp_url, params).json()
-
-        pics_pack = {}
         try:
-            popular_pics = sorted(
-                resp['response']['items'],
-                key=lambda k: k['likes']['count'] + k['comments']['count'],
-                reverse=True
-            )[0:3]
-            for pic in popular_pics:
-                if 'owner_id' not in pics_pack.keys():
-                    pics_pack['owner_id'] = pic['owner_id']
-                    pics_pack['pics_ids'] = []
-                pics_pack['pics_ids'].append(pic['id'])
+            method = 'photos.get'
 
-        except KeyError:
-            pass
+            params = {
+                'user_id': user_id,
+                'album_id': 'profile',
+                'extended': '1',
+                'access_token': self.user_token,
+                'v': self.api
+            }
 
-        finally:
-            return pics_pack
+            resp_url = f'https://api.vk.com/method/{method}'
+            resp = requests.get(resp_url, params).json()
+
+            pics_pack = {}
+            try:
+                popular_pics = sorted(
+                    resp['response']['items'],
+                    key=lambda k: k['likes']['count'] + k['comments']['count'],
+                    reverse=True
+                )[0:3]
+                for pic in popular_pics:
+                    if 'owner_id' not in pics_pack.keys():
+                        pics_pack['owner_id'] = pic['owner_id']
+                        pics_pack['pics_ids'] = []
+                    pics_pack['pics_ids'].append(pic['id'])
+
+            except KeyError:
+                pass
+
+            finally:
+                return pics_pack
+        except:
+            print("Что-то пошло не так...")
